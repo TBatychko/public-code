@@ -1,0 +1,202 @@
+"""
+Analyzes Class Attendance.
+Prints out the results.
+Saves the results to .txt file.
+"""
+
+"""
+0 submitted
+1 Instructor:
+2 Tutor
+3 Tutor for:
+4 Date and Time
+4 Date and Time
+6 Probation?
+7 Number of students attended:"""
+#
+import csv
+import calendar
+
+
+absolute_result = {}
+
+def process_line(line):
+    weekends_worked = 0
+    gs_result = []
+    tutors = set()
+    tutor_list = []
+
+    i = line[0:6]
+    if i[0] != "submitted":
+        name = str(i[2])
+        if i[2] not in tutors:
+            tutors.add(name)
+            tutor_list.append([i[2], 0])
+        start_entry_str = i[4].split()
+        end_entry_str = i[5].split()
+        start_day = start_entry_str[0].split("/") # ['11', '6', '2020']
+        week_day = calendar.weekday(int(start_day[2]), int(start_day[0]), int(start_day[1]))
+        if week_day in [5, 6]:
+            weekends_worked += 1
+            print("Weekend entry ----------------------------------------------------")
+            temp = i
+            temp.append("Wrong dates used")
+            gs_result.append(temp)
+        end_day = end_entry_str[0].split("/")  # ['11', '6', '2020']
+        if start_day != end_day:
+            print(i, "Wrong dates")
+            gs_result.append(i)
+        start_time_str = start_entry_str[1].split(":")
+        end_time_str = end_entry_str[1].split(":")
+        start_month = start_day[0]
+        the_start_day = start_day[1]
+        start_year = start_day[2]
+        start_hour, start_min = int(start_time_str[0]), int(start_time_str[1])
+        end_hour, end_min = int(end_time_str[0]), int(end_time_str[1])
+        start_date = start_time_str
+        end_date = end_time_str
+        if end_min not in [0, 15, 30, 45]:
+            print(i, "Wrong increments of time.")
+            temp = i
+            temp.append("wrong increments of time (00, 15, 30, 45")
+            gs_result.append(temp)
+        start_min = start_min / 60
+        end_min = end_min / 60
+        start_time = start_hour + start_min
+        end_time = end_hour + end_min
+        session_time = end_time - start_time
+        if session_time > 5:
+            print(i[2:6], "Session time error: longer than 5 hours.", session_time)
+            temp = i
+            temp.append("Session is longer than 5 hours.")
+            gs_result.append(temp)
+        if session_time < 0:
+            print(i[2:6], "Session time error: wrong AM of PM", session_time)
+            temp = i
+            temp.append("wrong AM or PM.")
+            gs_result.append(temp)
+        if session_time == 0:
+            print(i[2:6], "Session time error: 0 hours.", session_time)
+            temp = i
+            temp.append("Zero hours.")
+            gs_result.append(temp)
+        else:
+            for t in tutor_list:
+                if name == t[0]:
+                    t[1] = session_time + int(t[1])
+            if name in tutor_list:
+                index = tutor_list.index(name)
+                tutor_list[index][1] += session_time
+                print(tutor_list[index])
+
+
+
+gs_csv_list = []
+gs_result = []
+tutors = set()
+tutor_list = []
+with open('ActorsNames.csv', 'r') as csv_file1:
+    gs_reader = csv.reader(csv_file1)
+    for line in gs_reader:
+        gs_csv_list.append(line)
+gs_colunm_names = gs_csv_list[0]
+gs_cols = [i for i in gs_colunm_names]
+
+
+# the analyzer --------------------------------------------------------------------------
+for item in gs_csv_list:
+    i = item[0:6]
+    if i[0] != "submitted":
+        name = str(i[2])
+        if i[2] not in tutors:
+            tutors.add(name)
+            tutor_list.append([i[2], 0])
+        start_entry_str = i[4].split()
+        end_entry_str = i[5].split()
+        start_day = start_entry_str[0].split("/")  # ['11', '6', '2020']
+        week_day = calendar.weekday(int(start_day[2]), int(start_day[0]), int(start_day[1]))
+        if week_day in [5, 6]:
+            # weekends_worked += 1
+            print("Weekend entry.")
+            temp = i
+            temp.append("Wrong dates used")
+            gs_result.append(temp)
+        end_day = end_entry_str[0].split("/")  # ['11', '6', '2020']
+        if start_day != end_day:
+            print(i, "Wrong dates")
+            gs_result.append(i)
+        start_time_str = start_entry_str[1].split(":")
+        end_time_str = end_entry_str[1].split(":")
+        start_month = start_day[0]
+        the_start_day = start_day[1]
+        start_year = start_day[2]
+        start_hour, start_min = int(start_time_str[0]), int(start_time_str[1])
+        end_hour, end_min = int(end_time_str[0]), int(end_time_str[1])
+        start_date = start_time_str
+        end_date = end_time_str
+        if end_min not in [0, 15, 30, 45]:
+            print(i, "Wrong increments of time.")
+            temp = i
+            temp.append("wrong increments of time (00, 15, 30, 45")
+            gs_result.append(temp)
+        start_min = start_min / 60
+        end_min = end_min / 60
+        start_time = start_hour + start_min
+        end_time = end_hour + end_min
+        session_time = end_time - start_time
+        if session_time > 5:
+            print(i[2:6], "Session time error: longer than 5 hours.", session_time)
+            temp = i
+            temp.append("Session is longer than 5 hours.")
+            gs_result.append(temp)
+        if session_time < 0:
+            print(i[2:6], "Session time error: wrong AM of PM", session_time)
+            temp = i
+            temp.append("wrong AM or PM.")
+            gs_result.append(temp)
+        if session_time == 0:
+            print(i[2:6], "Session time error: 0 hours.", session_time)
+            temp = i
+            temp.append("Zero hours.")
+            gs_result.append(temp)
+        else:
+            for t in tutor_list:
+                if name == t[0]:
+                    t[1] = session_time + int(t[1])
+            if name in tutor_list:
+                index = tutor_list.index(name)
+                tutor_list[index][1] += session_time
+                print(tutor_list[index])
+
+
+print()
+print("Total time in November:")
+print()
+for l in tutor_list:
+    print("{:22}: {}".format(l[0], l[1]))
+
+
+#  write to file:
+
+# r = open("some-file.txt", "w")
+# for i in range(len(error_result)):
+#     a = str(error_result[i][0:7])
+#     r.write(a)
+#     r.write("\n")
+# optional code for writing the list to file:
+# r.write(str(error_result))
+# r.close()
+
+# for i in error_result:
+#     print(i)
+# for t in tutor_list:
+#     print(t)
+
+# print(medhatime, "total time October")
+
+
+
+
+
+
+
